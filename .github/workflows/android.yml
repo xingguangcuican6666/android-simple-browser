@@ -19,19 +19,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 克隆并编译Chromium内核（Android）
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y git python3 python3-pip openjdk-17-jdk clang lld nodejs npm
-          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-          export PATH="$PATH:$(pwd)/depot_tools"
-          fetch android
-          cd src
-          ./build/install-build-deps-android.sh
-          gclient sync
-          gn gen out/Default --args='target_os="android" is_debug=false'
-          autoninja -C out/Default chrome_public_apk
-        working-directory: ./
+      # 已集成chromium内核，无需编译，跳过此步骤
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
