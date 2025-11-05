@@ -11,9 +11,20 @@ public class WebViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         String url = getIntent().getStringExtra("url");
+        boolean desktopMode = getIntent().getBooleanExtra("desktopMode", false);
+        
         WebView webView = new WebView(this);
         webView.setWebViewClient(new WebViewClient());
         webView.getSettings().setJavaScriptEnabled(true);
+        
+        // 设置桌面版模式
+        if (desktopMode) {
+            String desktopUserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+            webView.getSettings().setUserAgentString(desktopUserAgent);
+            webView.getSettings().setUseWideViewPort(true);
+            webView.getSettings().setLoadWithOverviewMode(true);
+        }
+        
         if (url != null && !url.isEmpty()) {
             webView.loadUrl(url);
         }
