@@ -11,39 +11,24 @@ public class WebViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         String url = getIntent().getStringExtra("url");
-        // 默认启用桌面版模式
-        boolean desktopMode = getIntent().getBooleanExtra("desktopMode", true);
         
-        // 如果extras中没有desktopMode，尝试从Intent data URI中读取
+        // 如果从Intent data URI中获取URL
         if (getIntent().getData() != null) {
             android.net.Uri data = getIntent().getData();
             String uriString = data.toString();
-            
-            // 从URI fragment中提取desktopMode参数
-            if (uriString.contains("#desktopMode=true")) {
-                desktopMode = true;
-                // 移除fragment，获取真实URL
-                url = uriString.substring(0, uriString.indexOf("#desktopMode="));
-            } else if (uriString.contains("#desktopMode=false")) {
-                desktopMode = false;
-                url = uriString.substring(0, uriString.indexOf("#desktopMode="));
-            } else if (url == null || url.isEmpty()) {
-                // 如果没有url extra，直接使用URI（去掉可能的fragment）
-                url = uriString.split("#")[0];
-            }
+            // 移除可能的fragment标记
+            url = uriString.split("#")[0];
         }
         
         WebView webView = new WebView(this);
         webView.setWebViewClient(new WebViewClient());
         webView.getSettings().setJavaScriptEnabled(true);
         
-        // 设置桌面版模式
-        if (desktopMode) {
-            String desktopUserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
-            webView.getSettings().setUserAgentString(desktopUserAgent);
-            webView.getSettings().setUseWideViewPort(true);
-            webView.getSettings().setLoadWithOverviewMode(true);
-        }
+        // 始终启用桌面版模式
+        String desktopUserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+        webView.getSettings().setUserAgentString(desktopUserAgent);
+        webView.getSettings().setUseWideViewPort(true);
+        webView.getSettings().setLoadWithOverviewMode(true);
         
         if (url != null && !url.isEmpty()) {
             webView.loadUrl(url);
