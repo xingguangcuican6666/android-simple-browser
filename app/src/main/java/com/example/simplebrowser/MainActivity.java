@@ -145,8 +145,12 @@ public class MainActivity extends AppCompatActivity {
         android.content.pm.ShortcutManager shortcutManager =
                 (android.content.pm.ShortcutManager) getSystemService(Context.SHORTCUT_SERVICE);
         
+        // 使用Intent data来保存desktopMode，确保在快捷方式中被保留
+        String uriString = url + (desktopMode ? "#desktopMode=true" : "#desktopMode=false");
+        
         Intent intent = new Intent(this, WebViewActivity.class)
                 .setAction(Intent.ACTION_VIEW)
+                .setData(android.net.Uri.parse(uriString))
                 .putExtra("url", url)
                 .putExtra("desktopMode", desktopMode);
         
@@ -158,6 +162,16 @@ public class MainActivity extends AppCompatActivity {
         
         // 如果成功获取了favicon，使用它作为图标
         if (favicon != null) {
+            builder.setIcon(android.graphics.drawable.Icon.createWithBitmap(favicon));
+            Toast.makeText(this, "已获取网站图标", Toast.LENGTH_SHORT).show();
+        } else {
+            builder.setIcon(android.graphics.drawable.Icon.createWithResource(this, android.R.drawable.ic_menu_view));
+            Toast.makeText(this, "使用默认图标", Toast.LENGTH_SHORT).show();
+        }
+        
+        android.content.pm.ShortcutInfo shortcut = builder.build();
+        shortcutManager.requestPinShortcut(shortcut, null);
+    }
             builder.setIcon(android.graphics.drawable.Icon.createWithBitmap(favicon));
             Toast.makeText(this, "已获取网站图标", Toast.LENGTH_SHORT).show();
         } else {

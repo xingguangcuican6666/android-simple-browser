@@ -13,6 +13,25 @@ public class WebViewActivity extends AppCompatActivity {
         String url = getIntent().getStringExtra("url");
         boolean desktopMode = getIntent().getBooleanExtra("desktopMode", false);
         
+        // 如果extras中没有desktopMode，尝试从Intent data URI中读取
+        if (!desktopMode && getIntent().getData() != null) {
+            android.net.Uri data = getIntent().getData();
+            String uriString = data.toString();
+            
+            // 从URI fragment中提取desktopMode参数
+            if (uriString.contains("#desktopMode=true")) {
+                desktopMode = true;
+                // 移除fragment，获取真实URL
+                url = uriString.substring(0, uriString.indexOf("#desktopMode="));
+            } else if (uriString.contains("#desktopMode=false")) {
+                desktopMode = false;
+                url = uriString.substring(0, uriString.indexOf("#desktopMode="));
+            } else if (url == null || url.isEmpty()) {
+                // 如果没有url extra，直接使用URI（去掉可能的fragment）
+                url = uriString.split("#")[0];
+            }
+        }
+        
         WebView webView = new WebView(this);
         webView.setWebViewClient(new WebViewClient());
         webView.getSettings().setJavaScriptEnabled(true);
