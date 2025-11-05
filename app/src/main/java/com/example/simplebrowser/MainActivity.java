@@ -172,16 +172,6 @@ public class MainActivity extends AppCompatActivity {
         android.content.pm.ShortcutInfo shortcut = builder.build();
         shortcutManager.requestPinShortcut(shortcut, null);
     }
-            builder.setIcon(android.graphics.drawable.Icon.createWithBitmap(favicon));
-            Toast.makeText(this, "已获取网站图标", Toast.LENGTH_SHORT).show();
-        } else {
-            builder.setIcon(android.graphics.drawable.Icon.createWithResource(this, android.R.drawable.ic_menu_view));
-            Toast.makeText(this, "使用默认图标", Toast.LENGTH_SHORT).show();
-        }
-        
-        android.content.pm.ShortcutInfo shortcut = builder.build();
-        shortcutManager.requestPinShortcut(shortcut, null);
-    }
     
     @Override
     protected void onDestroy() {
