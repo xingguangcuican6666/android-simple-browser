@@ -21,7 +21,33 @@ public class WebViewActivity extends AppCompatActivity {
         }
         
         WebView webView = new WebView(this);
-        webView.setWebViewClient(new WebViewClient());
+        
+        // 自定义WebViewClient来注入JavaScript
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                
+                // 注入JavaScript代码，伪造桌面环境
+                String jsCode = 
+                    "(function() {" +
+                    "  Object.defineProperty(window.screen, 'width', {get: function() { return 1920; }});" +
+                    "  Object.defineProperty(window.screen, 'height', {get: function() { return 1080; }});" +
+                    "  Object.defineProperty(window.screen, 'availWidth', {get: function() { return 1920; }});" +
+                    "  Object.defineProperty(window.screen, 'availHeight', {get: function() { return 1080; }});" +
+                    "  Object.defineProperty(window, 'innerWidth', {get: function() { return 1920; }});" +
+                    "  Object.defineProperty(window, 'innerHeight', {get: function() { return 1080; }});" +
+                    "  Object.defineProperty(window, 'outerWidth', {get: function() { return 1920; }});" +
+                    "  Object.defineProperty(window, 'outerHeight', {get: function() { return 1080; }});" +
+                    "  if ('ontouchstart' in window) {" +
+                    "    delete window.ontouchstart;" +
+                    "  }" +
+                    "  Object.defineProperty(navigator, 'maxTouchPoints', {get: function() { return 0; }});" +
+                    "})();";
+                
+                view.evaluateJavascript(jsCode, null);
+            }
+        });
         
         // 强制启用桌面版模式 - 使用Windows Chrome User-Agent以获得更好的兼容性
         String desktopUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
