@@ -23,7 +23,9 @@ import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialRequestOp
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialType;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.fido.fido2.api.common.Fido2PendingIntent;
+// Note: avoid direct compile-time dependency on Fido2PendingIntent type to improve
+// compatibility across Play Services versions — we'll handle the returned object
+// at runtime (instanceof or reflection) to extract an IntentSender.
 import android.app.PendingIntent;
 import androidx.activity.result.IntentSenderRequest;
 
@@ -141,10 +143,9 @@ public class GeckoViewActivity extends AppCompatActivity {
      * 注意：某些 geckoview 版本提供了直接的 WebAuthn delegate 回调，优先使用 Geckoview 提供的 API将结果直接回填给引擎。
      */
     private void startFido2FlowPlaceholder() {
-        // 示例占位：构造一个空 Intent 并启动，真实实现应用 FIDO2 API 构造
-        android.content.Intent dummy = new android.content.Intent();
-        dummy.putExtra("dummy", true);
-        fido2Launcher.launch(dummy);
+        // 占位：当前环境下不启动任何 IntentSender（避免类型不匹配）；
+        // 真实环境可调用 startFido2Register/startFido2Sign
+        android.util.Log.w(TAG, "startFido2FlowPlaceholder: FIDO2 launcher not invoked in placeholder mode");
     }
 
     /**
@@ -175,15 +176,32 @@ public class GeckoViewActivity extends AppCompatActivity {
 
             Fido.getFido2ApiClient(this)
                     .getRegisterIntent(options)
-                    .addOnSuccessListener(new OnSuccessListener<Fido2PendingIntent>() {
+                    .addOnSuccessListener(new OnSuccessListener<Object>() {
                         @Override
-                        public void onSuccess(Fido2PendingIntent pending) {
+                        public void onSuccess(Object pending) {
                             try {
-                                if (pending != null && pending.getIntentSender() != null) {
-                                    IntentSenderRequest req = new IntentSenderRequest.Builder(pending.getIntentSender()).build();
+                                android.content.IntentSender sender = null;
+                                if (pending == null) {
+                                    Log.w(TAG, "FIDO2 pending is null");
+                                } else if (pending instanceof PendingIntent) {
+                                    sender = ((PendingIntent) pending).getIntentSender();
+                                } else {
+                                    // Try reflection: some Play Services versions return Fido2PendingIntent
+                                    try {
+                                        java.lang.reflect.Method m = pending.getClass().getMethod("getIntentSender");
+                                        Object o = m.invoke(pending);
+                                        if (o instanceof android.content.IntentSender) {
+                                            sender = (android.content.IntentSender) o;
+                                        }
+                                    } catch (NoSuchMethodException nsme) {
+                                        Log.w(TAG, "pending object has no getIntentSender method");
+                                    }
+                                }
+                                if (sender != null) {
+                                    IntentSenderRequest req = new IntentSenderRequest.Builder(sender).build();
                                     fido2Launcher.launch(req);
                                 } else {
-                                    Log.w(TAG, "FIDO2 pendingIntent is null or has no IntentSender");
+                                    Log.w(TAG, "FIDO2 pendingIntent has no IntentSender");
                                 }
                             } catch (Exception e) {
                                 Log.e(TAG, "Failed to launch FIDO2 pending intent", e);
@@ -218,15 +236,31 @@ public class GeckoViewActivity extends AppCompatActivity {
 
             Fido.getFido2ApiClient(this)
                     .getSignIntent(options)
-                    .addOnSuccessListener(new OnSuccessListener<Fido2PendingIntent>() {
+                    .addOnSuccessListener(new OnSuccessListener<Object>() {
                         @Override
-                        public void onSuccess(Fido2PendingIntent pending) {
+                        public void onSuccess(Object pending) {
                             try {
-                                if (pending != null && pending.getIntentSender() != null) {
-                                    IntentSenderRequest req = new IntentSenderRequest.Builder(pending.getIntentSender()).build();
+                                android.content.IntentSender sender = null;
+                                if (pending == null) {
+                                    Log.w(TAG, "FIDO2 pending is null");
+                                } else if (pending instanceof PendingIntent) {
+                                    sender = ((PendingIntent) pending).getIntentSender();
+                                } else {
+                                    try {
+                                        java.lang.reflect.Method m = pending.getClass().getMethod("getIntentSender");
+                                        Object o = m.invoke(pending);
+                                        if (o instanceof android.content.IntentSender) {
+                                            sender = (android.content.IntentSender) o;
+                                        }
+                                    } catch (NoSuchMethodException nsme) {
+                                        Log.w(TAG, "pending object has no getIntentSender method");
+                                    }
+                                }
+                                if (sender != null) {
+                                    IntentSenderRequest req = new IntentSenderRequest.Builder(sender).build();
                                     fido2Launcher.launch(req);
                                 } else {
-                                    Log.w(TAG, "FIDO2 sign pendingIntent is null or has no IntentSender");
+                                    Log.w(TAG, "FIDO2 sign pendingIntent has no IntentSender");
                                 }
                             } catch (Exception e) {
                                 Log.e(TAG, "Failed to launch FIDO2 sign pending intent", e);
