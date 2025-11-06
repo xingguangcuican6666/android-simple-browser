@@ -27,5 +27,5 @@ android {
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.browser:browser:1.7.0'
-    implementation 'org.mozilla.geckoview:geckoview:120.0.20231205103541'
+    implementation 'org.mozilla.geckoview:geckoview:143.0.20250929153833'
 }
