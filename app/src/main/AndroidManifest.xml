@@ -35,6 +35,9 @@
         <activity
             android:name=".WebViewActivity"
             android:exported="false"/>
+        <activity
+            android:name=".ChromeTabActivity"
+            android:exported="false"/>
     </application>
 
 </manifest>

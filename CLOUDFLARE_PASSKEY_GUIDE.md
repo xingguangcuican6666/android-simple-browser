@@ -1,8 +1,40 @@
 # Cloudflare人机验证和通行密钥使用指南
 
-## 最新改进
+## 🎉 最新更新：Chrome Custom Tabs支持
 
-### 针对Cloudflare验证的增强
+应用现在支持**Chrome Custom Tabs**作为浏览器模式！这是解决Cloudflare验证和通行密钥问题的最佳方案。
+
+### 使用方法
+
+1. 在主界面选择浏览器模式：
+   - **Chrome Custom Tabs (推荐)** - 完美支持Cloudflare和通行密钥
+   - **WebView (内置浏览器)** - 基本浏览功能
+
+2. 输入网址并生成快捷方式
+
+3. 点击快捷方式将使用您选择的浏览器模式打开网页
+
+### Chrome Custom Tabs的优势
+
+✅ **完美支持Cloudflare验证**
+- 使用真实Chrome浏览器内核
+- 完整的JavaScript和WebGL支持
+- 不会被识别为自动化工具
+
+✅ **完美支持通行密钥/WebAuthn**
+- 完整的Web Authentication API支持
+- 生物识别功能完全可用
+- 与Chrome浏览器共享认证状态
+
+✅ **其他优势**
+- 共享Chrome的Cookie和登录状态
+- 更好的性能和兼容性
+- 自动更新浏览器内核
+- 支持所有Chrome扩展功能
+
+### WebView模式（已优化）
+
+如果您仍然选择使用WebView模式，应用已经进行了以下优化：
 
 1. **隐藏WebView特征**
    - 设置 `navigator.webdriver = undefined` 避免被检测

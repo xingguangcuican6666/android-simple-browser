@@ -1,10 +1,33 @@
 # Android Simple Browser
 
-A simple Android browser application with enhanced support for CAPTCHA verification and passkey authentication.
+A simple Android browser application with enhanced support for CAPTCHA verification and passkey authentication. **Now with Chrome Custom Tabs support for perfect Cloudflare and WebAuthn compatibility!**
+
+## 🎉 New Feature: Chrome Custom Tabs
+
+The app now supports **Chrome Custom Tabs** as the recommended browsing mode for:
+- ✅ Perfect Cloudflare verification support
+- ✅ Full WebAuthn/passkey functionality
+- ✅ Real Chrome browser experience
+- ✅ Shared cookies and login state with Chrome
 
 ## Features
 
-### Desktop Mode
+### Dual Browser Modes
+
+**1. Chrome Custom Tabs (Recommended)**
+- Uses the actual Chrome browser
+- Perfect support for all modern web features
+- Cloudflare verification works flawlessly
+- WebAuthn/passkeys fully functional
+- Shares Chrome's cookies and sessions
+
+**2. WebView Mode (Enhanced)**
+- Built-in browser view
+- Desktop mode spoofing
+- Enhanced CAPTCHA support
+- Basic passkey support (with limitations)
+
+### Desktop Mode (WebView)
 - Spoofs Windows Chrome user agent
 - Simulates 1920x1080 desktop resolution
 - Hides mobile touch features
@@ -35,10 +58,25 @@ All permissions are optional - the app will continue to work even if some are de
 ## Usage
 
 1. Launch the app
-2. Grant permissions when requested (recommended for best experience)
-3. Enter a URL in the input field
+2. Enter a URL in the input field
+3. **Choose your browser mode:**
+   - **Chrome Custom Tabs (Recommended)**: For perfect Cloudflare and passkey support
+   - **WebView**: For basic browsing with desktop mode
 4. Tap "生成快捷方式" (Create Shortcut) to create a home screen shortcut
-5. The shortcut will open the website in desktop mode with full verification support
+5. The shortcut will open the website using your selected browser mode
+
+### When to Use Each Mode
+
+**Use Chrome Custom Tabs when:**
+- Website requires Cloudflare verification
+- Using passkeys/WebAuthn authentication
+- Need full modern web feature support
+- Want to share login state with Chrome
+
+**Use WebView when:**
+- Need a completely embedded browser experience
+- Want desktop mode spoofing
+- Don't need advanced verification features
 
 ## Technical Details
 
