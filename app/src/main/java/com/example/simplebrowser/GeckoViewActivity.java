@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.mozilla.geckoview.GeckoRuntime;
 import org.mozilla.geckoview.GeckoSession;
 import org.mozilla.geckoview.GeckoView;
+import org.mozilla.geckoview.GeckoSessionSettings;
 import org.mozilla.geckoview.GeckoSession.WebAuthnDelegate;
 
 /**
@@ -32,7 +33,10 @@ public class GeckoViewActivity extends AppCompatActivity {
         }
         
         // 创建并配置GeckoSession
-        geckoSession = new GeckoSession();
+        GeckoSessionSettings settings = new GeckoSessionSettings.Builder()
+                .userAgentMode(GeckoSessionSettings.USER_AGENT_MODE_DESKTOP) // 设置为桌面版User Agent
+                .build();
+        geckoSession = new GeckoSession(settings);
         geckoSession.open(sRuntime);
         geckoView.setSession(geckoSession);
         geckoSession.setWebAuthnDelegate(new MyWebAuthnDelegate());
