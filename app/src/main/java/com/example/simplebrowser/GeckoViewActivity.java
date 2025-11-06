@@ -75,7 +75,8 @@ public class GeckoViewActivity extends AppCompatActivity {
             final String desktopSpoofScript = getDesktopSpoofScript();
             // 在页面加载后注入脚本 - 使用简单的监听器（GeckoSession.loadUri 不直接提供 onPageFinished 的钩子）
             // 所以我们使用 evaluateJS 在短延迟后注入，作为兼容实现
-            geckoView.getSettings().setLayerType(View.LAYER_TYPE_HARDWARE);
+            // GeckoView 是一个 View，直接设置 layerType
+            geckoView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
             geckoView.postDelayed(new Runnable() {
                 @Override
                 public void run() {
