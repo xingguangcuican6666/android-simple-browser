@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace 'com.example.simplebrowser'
-    compileSdkVersion 34
+    compileSdkVersion 35
     defaultConfig {
         applicationId "com.example.simplebrowser"
         minSdkVersion 24
@@ -26,4 +26,6 @@ android {
 
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.browser:browser:1.7.0'
+    implementation 'org.mozilla.geckoview:geckoview:143.0.20250929153833'
 }

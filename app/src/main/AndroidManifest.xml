@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- 基本网络权限 -->
     <uses-permission android:name="android.permission.INTERNET" />
+    
+    <!-- 地理位置权限 - 某些验证需要位置信息 -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    
+    <!-- 相机权限 - 支持二维码扫描和生物识别验证 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    
+    <!-- 麦克风权限 - 支持语音验证 -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    
+    <!-- 可选特性 - 不强制要求这些硬件 -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <uses-feature android:name="android.hardware.location" android:required="false" />
+    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -17,6 +34,12 @@
         </activity>
         <activity
             android:name=".WebViewActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".ChromeTabActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".GeckoViewActivity"
             android:exported="false"/>
     </application>
 
