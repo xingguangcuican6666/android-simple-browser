@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.mozilla.geckoview.GeckoRuntime;
 import org.mozilla.geckoview.GeckoSession;
 import org.mozilla.geckoview.GeckoView;
+import org.mozilla.geckoview.GeckoSession.WebAuthnDelegate;
 
 /**
  * 使用GeckoView（Firefox引擎）打开网页
@@ -34,6 +35,7 @@ public class GeckoViewActivity extends AppCompatActivity {
         geckoSession = new GeckoSession();
         geckoSession.open(sRuntime);
         geckoView.setSession(geckoSession);
+        geckoSession.setWebAuthnDelegate(new MyWebAuthnDelegate());
         
         // 获取URL
         String url = getIntent().getStringExtra("url");
@@ -76,8 +78,10 @@ public class GeckoViewActivity extends AppCompatActivity {
         // 处理返回键
         if (keyCode == KeyEvent.KEYCODE_BACK && geckoSession.getNavigationDelegate() != null) {
             // 尝试后退
-            geckoSession.goBack();
-            return true;
+            if (geckoSession.canGoBack()) {
+                geckoSession.goBack();
+                return true;
+            }
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -90,3 +94,33 @@ public class GeckoViewActivity extends AppCompatActivity {
         }
     }
 }
+
+    private class MyWebAuthnDelegate implements GeckoSession.WebAuthnDelegate {
+        @Override
+        public void onFido2Register(GeckoSession session, GeckoSession.WebAuthnRequest request) {
+            // Use Google Play Services FIDO2 API to handle registration
+            com.google.android.gms.fido.fido2.Fido2ApiClient fido2ApiClient = com.google.android.gms.fido.fido2.Fido2.getFido2ApiClient(GeckoViewActivity.this);
+            com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialCreationOptions options = com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialCreationOptions.deserializeFromBytes(request.getPublicKeyCredentialCreationOptions());
+            com.google.android.gms.tasks.Task<com.google.android.gms.fido.fido2.api.common.AuthenticatorAttestationResponse> task = fido2ApiClient.register(options);
+            task.addOnSuccessListener(response -> {
+                request.complete(response.serializeToBytes());
+            });
+            task.addOnFailureListener(e -> {
+                request.cancel();
+            });
+        }
+
+        @Override
+        public void onFido2Sign(GeckoSession session, GeckoSession.WebAuthnRequest request) {
+            // Use Google Play Services FIDO2 API to handle signing
+            com.google.android.gms.fido.fido2.Fido2ApiClient fido2ApiClient = com.google.android.gms.fido.fido2.Fido2.getFido2ApiClient(GeckoViewActivity.this);
+            com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialRequestOptions options = com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialRequestOptions.deserializeFromBytes(request.getPublicKeyCredentialRequestOptions());
+            com.google.android.gms.tasks.Task<com.google.android.gms.fido.fido2.api.common.AuthenticatorAssertionResponse> task = fido2ApiClient.sign(options);
+            task.addOnSuccessListener(response -> {
+                request.complete(response.serializeToBytes());
+            });
+            task.addOnFailureListener(e -> {
+                request.cancel();
+            });
+        }
+    }
