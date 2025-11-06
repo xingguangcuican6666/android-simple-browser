@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.mozilla.geckoview.GeckoRuntime;
 import org.mozilla.geckoview.GeckoSession;
 import org.mozilla.geckoview.GeckoView;
-import org.mozilla.geckoview.GeckoSessionSettings;
 
 /**
  * 使用GeckoView（Firefox引擎）打开网页
@@ -40,17 +39,8 @@ public class GeckoViewActivity extends AppCompatActivity {
         
         // 创建并配置GeckoSession
         geckoSession = new GeckoSession();
-        // 如果需要，可以配置 GeckoSessionSettings（例如 user-agent）
-        if (FORCE_DESKTOP) {
-            try {
-                GeckoSessionSettings settings = new GeckoSessionSettings();
-                // 设置为桌面UA，模仿 WebViewActivity 的 UA
-                settings.setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-                geckoSession.setSessionSettings(settings);
-            } catch (Throwable ignored) {
-                // 旧版 Geckoview 可能没有这些 API，忽略并继续
-            }
-        }
+        // 如果需要设置 UA，GeckoView/GeckoSession 的 API 在不同版本中差异较大。
+        // 为保证兼容性，本实现改为通过注入脚本强制桌面特征（见后续注入逻辑）。
         geckoSession.open(sRuntime);
         geckoView.setSession(geckoSession);
         
