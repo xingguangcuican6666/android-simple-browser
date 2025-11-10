@@ -175,8 +175,8 @@ public class WebViewActivity extends AppCompatActivity {
                 req.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                 req.setVisibleInDownloadsUi(true);
                 req.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
-                dm.enqueue(req);
-                android.widget.Toast.makeText(this, "开始下载: " + fileName, android.widget.Toast.LENGTH_SHORT).show();
+                long id = dm.enqueue(req);
+                startActivity(new android.content.Intent(this, DownloadActivity.class).putExtra("downloadId", id));
             } catch (Exception e) {
                 android.widget.Toast.makeText(this, "下载失败", android.widget.Toast.LENGTH_SHORT).show();
             }
@@ -216,8 +216,8 @@ public class WebViewActivity extends AppCompatActivity {
                                     String imgName = URLUtil.guessFileName(extra, null, null);
                                     req2.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                                     req2.setDestinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, imgName);
-                                    dm.enqueue(req2);
-                                    android.widget.Toast.makeText(this, "开始保存图片", android.widget.Toast.LENGTH_SHORT).show();
+                                    long id2 = dm.enqueue(req2);
+                                    startActivity(new android.content.Intent(this, DownloadActivity.class).putExtra("downloadId", id2));
                                 } catch (Exception e) { android.widget.Toast.makeText(this, "保存失败", android.widget.Toast.LENGTH_SHORT).show(); }
                             }
                         })
