@@ -56,8 +56,7 @@ public class GeckoViewActivity extends AppCompatActivity {
         if (sRuntime == null) {
             sRuntime = GeckoRuntime.create(this);
         }
-        // 强制桌面UA，参考内置浏览器
-        sRuntime.getSettings().setUserAgentOverride("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+
         
         // 创建并配置GeckoSession
         geckoSession = new GeckoSession();
