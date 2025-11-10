@@ -171,7 +171,11 @@ public class WebViewActivity extends AppCompatActivity {
                 String cookies = CookieManager.getInstance().getCookie(downloadUrl);
                 if (cookies != null) req.addRequestHeader("Cookie", cookies);
                 if (userAgent != null) req.addRequestHeader("User-Agent", userAgent);
+                String referer = webView.getUrl();
+                if (referer != null) req.addRequestHeader("Referer", referer);
                 if (mimetype != null) req.setMimeType(mimetype);
+                req.setTitle(fileName);
+                req.setDescription("正在下载");
                 req.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                 req.setVisibleInDownloadsUi(true);
                 req.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
