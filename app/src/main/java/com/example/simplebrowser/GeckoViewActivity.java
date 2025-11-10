@@ -56,6 +56,8 @@ public class GeckoViewActivity extends AppCompatActivity {
         if (sRuntime == null) {
             sRuntime = GeckoRuntime.create(this);
         }
+        // 强制桌面UA，参考内置浏览器
+        sRuntime.getSettings().setUserAgentOverride("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
         
         // 创建并配置GeckoSession
         geckoSession = new GeckoSession();
@@ -114,8 +116,7 @@ public class GeckoViewActivity extends AppCompatActivity {
                         java.lang.reflect.Method eval = geckoSession.getClass().getMethod("evaluateJS", String.class);
                         eval.invoke(geckoSession, desktopSpoofScript);
                     } catch (NoSuchMethodException nsme) {
-                        // Fallback: evaluateJS 不存在时使用 javascript: 注入保证桌面脚本生效
-                        geckoSession.loadUri("javascript:(function() { " + desktopSpoofScript + " })();");
+                        // evaluateJS 不存在则跳过，避免影响历史
                     } catch (Throwable ignored) {}
                 }
             }, 500);
