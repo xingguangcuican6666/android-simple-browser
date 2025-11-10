@@ -13,6 +13,8 @@
     
     <!-- 麦克风权限 - 支持语音验证 -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- 外部存储写入(<=28) 用于下载保存 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
     
     <!-- 可选特性 - 不强制要求这些硬件 -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
