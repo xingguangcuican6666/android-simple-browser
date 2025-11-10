@@ -100,12 +100,13 @@ public class GeckoViewActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     try {
-                        geckoSession.getWebExtensionController();
-                        // evaluateJS 在部分 geckoview 版本里是通过 GeckoSession#sendMessage 或类似方法实现。
-                        // 这里调用 evaluateJS 可能不存在；作为兼容方案，我们调用 loadUri("javascript:..."), 让引擎执行脚本。
-                        geckoSession.loadUri("javascript:(function() { " + desktopSpoofScript + " })();");
+                        // 优先使用 evaluateJS(如果存在)来避免产生新的导航条目破坏历史记录
+                        java.lang.reflect.Method eval = geckoSession.getClass().getMethod("evaluateJS", String.class);
+                        eval.invoke(geckoSession, desktopSpoofScript);
+                    } catch (NoSuchMethodException nsme) {
+                        // 如果没有 evaluateJS API，则暂时不再使用 javascript: 导航，避免清空历史
+                        // 可在后续通过 WebExtension 实现注入；这里静默跳过
                     } catch (Throwable ignored) {
-                        // 忽略注入失败，浏览器仍可正常工作
                     }
                 }
             }, 500);
