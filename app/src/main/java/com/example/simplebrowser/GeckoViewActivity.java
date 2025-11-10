@@ -280,11 +280,10 @@ public class GeckoViewActivity extends AppCompatActivity {
     
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        // 处理返回键：优先让 GeckoSession 后退（如果可行），否则交给系统
+        // 处理返回键：优先让 GeckoSession 后退（如果可行），否则最小化应用
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (geckoSession != null) {
                 try {
-                    // 优先使用 canGoBack()（如果存在）
                     java.lang.reflect.Method canGoBack = geckoSession.getClass().getMethod("canGoBack");
                     Object res = canGoBack.invoke(geckoSession);
                     if (res instanceof Boolean && ((Boolean) res)) {
@@ -292,7 +291,6 @@ public class GeckoViewActivity extends AppCompatActivity {
                         return true;
                     }
                 } catch (NoSuchMethodException nsme) {
-                    // 没有 canGoBack，尝试通过 NavigationDelegate 或直接 goBack
                     try {
                         if (geckoSession.getNavigationDelegate() != null) {
                             geckoSession.goBack();
@@ -301,6 +299,8 @@ public class GeckoViewActivity extends AppCompatActivity {
                     } catch (Throwable ignored) { }
                 } catch (Throwable ignored) { }
             }
+            moveTaskToBack(true);
+            return true;
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -325,7 +325,7 @@ public class GeckoViewActivity extends AppCompatActivity {
                 } catch (Throwable ignored) { }
             } catch (Throwable ignored) { }
         }
-        super.onBackPressed();
+        moveTaskToBack(true);
     }
 
     /**
