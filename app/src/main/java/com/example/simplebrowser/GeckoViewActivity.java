@@ -74,37 +74,7 @@ public class GeckoViewActivity extends AppCompatActivity {
 
         // 内容委托：下载与长按上下文菜单
         geckoSession.setContentDelegate(new GeckoSession.ContentDelegate() {
-            // GeckoView older version: no direct Download class; fallback: inject JS to intercept links with download attribute could be future enhancement.
-            // Removing onDownload override for compatibility.
-                try {
-                    String url = download != null ? download.uri : null;
-                    if (url == null) return;
-                    DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-                    android.net.Uri uri = android.net.Uri.parse(url);
-                    DownloadManager.Request req = new DownloadManager.Request(uri);
-                    String fileName = (download != null && download.filename != null && !download.filename.isEmpty())
-                            ? download.filename
-                            : URLUtil.guessFileName(url, download != null ? download.contentDisposition : null,
-                                    download != null ? download.contentType : null);
-                    if (download != null && download.userAgent != null) {
-                        req.addRequestHeader("User-Agent", download.userAgent);
-                    }
-                    if (download != null && download.referrerUri != null) {
-                        req.addRequestHeader("Referer", download.referrerUri);
-                    }
-                    if (download != null && download.contentType != null) {
-                        req.setMimeType(download.contentType);
-                    }
-                    req.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                    req.setVisibleInDownloadsUi(true);
-                    req.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
-                    dm.enqueue(req);
-                    Toast.makeText(GeckoViewActivity.this, "开始下载: " + fileName, Toast.LENGTH_SHORT).show();
-                } catch (Exception e) {
-                    Toast.makeText(GeckoViewActivity.this, "下载失败", Toast.LENGTH_SHORT).show();
-                }
-            }
-
+            // NOTE: Download callback removed for compatibility with current GeckoView version.
             @Override
             public void onContextMenu(GeckoSession session, int screenX, int screenY,
                                       GeckoSession.ContentDelegate.ContextElement element) {
