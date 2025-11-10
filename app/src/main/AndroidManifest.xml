@@ -13,6 +13,8 @@
     
     <!-- 麦克风权限 - 支持语音验证 -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Android 13+ 通知权限：显示下载通知 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- 外部存储写入(<=28) 用于下载保存 -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
     
@@ -25,6 +27,7 @@
     <application
         android:allowBackup="true"
         android:label="SimpleBrowser"
+        android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
