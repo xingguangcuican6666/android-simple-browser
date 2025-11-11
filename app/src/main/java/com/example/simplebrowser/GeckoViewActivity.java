@@ -15,6 +15,13 @@ import android.util.Base64;
 import android.util.Log;
 import java.util.Collections;
 import com.google.android.gms.fido.Fido;
+import android.app.DownloadManager;
+import android.os.Environment;
+import android.webkit.URLUtil;
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.widget.Toast;
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialCreationOptions;
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialRpEntity;
 import com.google.android.gms.fido.fido2.api.common.PublicKeyCredentialParameters;
@@ -64,6 +71,59 @@ public class GeckoViewActivity extends AppCompatActivity {
         // 为保证兼容性，本实现改为通过注入脚本强制桌面特征（见后续注入逻辑）。
         geckoSession.open(sRuntime);
         geckoView.setSession(geckoSession);
+
+        // 内容委托：下载与长按上下文菜单
+        geckoSession.setContentDelegate(new GeckoSession.ContentDelegate() {
+            // 外部下载响应API当前Gecko版本不可用，使用长按“下载链接”手动触发。
+            @Override
+            public void onContextMenu(GeckoSession session, int screenX, int screenY,
+                                      GeckoSession.ContentDelegate.ContextElement element) {
+                if (element == null) return;
+                java.util.ArrayList<String> options = new java.util.ArrayList<>();
+                final String link = element.linkUri;
+                final String src = element.srcUri;
+                if (link != null && !link.isEmpty()) { options.add("复制链接"); options.add("下载链接"); }
+                if (src != null && !src.isEmpty()) options.add("保存图片");
+                if (options.isEmpty()) return;
+                new AlertDialog.Builder(GeckoViewActivity.this)
+                        .setTitle("操作")
+                        .setItems(options.toArray(new String[0]), (dialog, which) -> {
+                            String choice = options.get(which);
+                            if ("复制链接".equals(choice) && link != null) {
+                                try {
+                                    ClipboardManager cb = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                                    cb.setPrimaryClip(ClipData.newPlainText("link", link));
+                                    Toast.makeText(GeckoViewActivity.this, "已复制", Toast.LENGTH_SHORT).show();
+                                } catch (Exception e) { Toast.makeText(GeckoViewActivity.this, "复制失败", Toast.LENGTH_SHORT).show(); }
+                            } else if ("下载链接".equals(choice) && link != null) {
+                                try {
+                                    DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                                    android.net.Uri uriL = android.net.Uri.parse(link);
+                                    DownloadManager.Request reqL = new DownloadManager.Request(uriL);
+                                    String fileNameL = URLUtil.guessFileName(link, null, null);
+                                    reqL.setTitle(fileNameL);
+                                    reqL.setDescription("正在下载");
+                                    reqL.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                                    reqL.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileNameL);
+                                    long idL = dm.enqueue(reqL);
+                                    startActivity(new android.content.Intent(GeckoViewActivity.this, DownloadActivity.class).putExtra("downloadId", idL));
+                                } catch (Exception e) { Toast.makeText(GeckoViewActivity.this, "下载失败", Toast.LENGTH_SHORT).show(); }
+                            } else if ("保存图片".equals(choice) && src != null) {
+                                try {
+                                    DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                                    android.net.Uri uri2 = android.net.Uri.parse(src);
+                                    DownloadManager.Request req2 = new DownloadManager.Request(uri2);
+                                    String imgName = URLUtil.guessFileName(src, null, null);
+                                    req2.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                                    req2.setDestinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, imgName);
+                                    long id2 = dm.enqueue(req2);
+                                    startActivity(new android.content.Intent(GeckoViewActivity.this, DownloadActivity.class).putExtra("downloadId", id2));
+                                } catch (Exception e) { Toast.makeText(GeckoViewActivity.this, "保存失败", Toast.LENGTH_SHORT).show(); }
+                            }
+                        })
+                        .show();
+            }
+        });
         
         // 监听导航能力变化，更新是否可后退
         geckoSession.setNavigationDelegate(new GeckoSession.NavigationDelegate() {

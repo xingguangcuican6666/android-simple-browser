@@ -15,6 +15,12 @@ import android.webkit.WebSettings;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import android.app.DownloadManager;
+import android.os.Environment;
+import android.webkit.URLUtil;
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 
 public class WebViewActivity extends AppCompatActivity {
     
@@ -26,7 +32,8 @@ public class WebViewActivity extends AppCompatActivity {
         Manifest.permission.CAMERA,
         Manifest.permission.RECORD_AUDIO,
         Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
     
     private String getDesktopSpoofScript() {
@@ -154,6 +161,76 @@ public class WebViewActivity extends AppCompatActivity {
             settings.setAllowUniversalAccessFromFileURLs(true);
         }
         
+        // 下载监听 - 使用系统DownloadManager
+        webView.setDownloadListener((downloadUrl, userAgent, contentDisposition, mimetype, contentLength) -> {
+            try {
+                DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                android.net.Uri uri = android.net.Uri.parse(downloadUrl);
+                DownloadManager.Request req = new DownloadManager.Request(uri);
+                String fileName = URLUtil.guessFileName(downloadUrl, contentDisposition, mimetype);
+                String cookies = CookieManager.getInstance().getCookie(downloadUrl);
+                if (cookies != null) req.addRequestHeader("Cookie", cookies);
+                if (userAgent != null) req.addRequestHeader("User-Agent", userAgent);
+                String referer = webView.getUrl();
+                if (referer != null) req.addRequestHeader("Referer", referer);
+                if (mimetype != null) req.setMimeType(mimetype);
+                req.setTitle(fileName);
+                req.setDescription("正在下载");
+                req.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                req.setVisibleInDownloadsUi(true);
+                req.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
+                long id = dm.enqueue(req);
+                startActivity(new android.content.Intent(this, DownloadActivity.class).putExtra("downloadId", id));
+            } catch (Exception e) {
+                android.widget.Toast.makeText(this, "下载失败", android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // 长按处理：复制链接 / 保存图片
+        webView.setOnLongClickListener(v -> {
+            WebView.HitTestResult result = webView.getHitTestResult();
+            if (result == null) return false;
+            int type = result.getType();
+            String extra = result.getExtra();
+            if (extra == null) return false;
+            if (type == WebView.HitTestResult.SRC_ANCHOR_TYPE ||
+                type == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE ||
+                type == WebView.HitTestResult.IMAGE_TYPE) {
+                java.util.ArrayList<String> options = new java.util.ArrayList<>();
+                options.add("复制链接");
+                boolean isImage = (type == WebView.HitTestResult.IMAGE_TYPE || type == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE);
+                if (isImage) options.add("保存图片");
+                new AlertDialog.Builder(this)
+                        .setTitle("操作")
+                        .setItems(options.toArray(new String[0]), (dialog, which) -> {
+                            String choice = options.get(which);
+                            if ("复制链接".equals(choice)) {
+                                try {
+                                    ClipboardManager cb = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                                    cb.setPrimaryClip(ClipData.newPlainText("link", extra));
+                                    android.widget.Toast.makeText(this, "已复制", android.widget.Toast.LENGTH_SHORT).show();
+                                } catch (Exception e) { android.widget.Toast.makeText(this, "复制失败", android.widget.Toast.LENGTH_SHORT).show(); }
+                            } else if ("保存图片".equals(choice)) {
+                                try {
+                                    DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                                    android.net.Uri uri2 = android.net.Uri.parse(extra);
+                                    DownloadManager.Request req2 = new DownloadManager.Request(uri2);
+                                    String cookies2 = CookieManager.getInstance().getCookie(extra);
+                                    if (cookies2 != null) req2.addRequestHeader("Cookie", cookies2);
+                                    String imgName = URLUtil.guessFileName(extra, null, null);
+                                    req2.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                                    req2.setDestinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, imgName);
+                                    long id2 = dm.enqueue(req2);
+                                    startActivity(new android.content.Intent(this, DownloadActivity.class).putExtra("downloadId", id2));
+                                } catch (Exception e) { android.widget.Toast.makeText(this, "保存失败", android.widget.Toast.LENGTH_SHORT).show(); }
+                            }
+                        })
+                        .show();
+                return true;
+            }
+            return false;
+        });
+
         // 自定义WebViewClient来注入JavaScript
         webView.setWebViewClient(new WebViewClient() {
             @Override
